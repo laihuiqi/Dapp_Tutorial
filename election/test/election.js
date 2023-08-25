@@ -74,7 +74,7 @@ contract("Election", function(accounts) {
             assert.equal(voteCount, 1, "accepts first voter");
             return electionInstance.vote(candidateId, { from: accounts[1] });
         }).then(assert.fail).catch(function(err) {
-            assert(err.message.indexOf('revert') >= 0, "error message must contain revert");
+            assert(err.message.indexOf('revert') > 0, "message is not revert");
             return electionInstance.candidates(1);
         }).then(function(candidate1) {
             var voteCount = candidate1[2];

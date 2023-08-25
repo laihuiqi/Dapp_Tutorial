@@ -1,7 +1,7 @@
 App = {
     web3Provider: null,
     contracts: {},
-    account: '0x0',
+    account: '0x244FFbec16672666d02B674701F10314742052aA',
 
     init: function() {
         return App.initWeb3();
@@ -13,7 +13,7 @@ App = {
             web3 = new Web3(web3.currentProvider);
         } else {
             App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
-            web3 = new Web3(App.currentProvider);
+            web3 = new Web3(App.web3Provider);
         }
 
         return App.initContract();
@@ -40,12 +40,14 @@ App = {
             if (err === null) {
                 App.account = account;
                 $("#accountAddress").html("Your Account: " + account);
+            } else {
+                $("#accountAddress").html("Your Account: " + err);
             }
         });
 
         App.contracts.Election.deployed().then(function(instance) {
             electionInstance = instance;
-            return electionInstance.candidatesCount();
+            return electionInstance.candidateCount();
         }).then(function(candidatesCount) {
             var candidatesResults = $("#candidatesResults");
             candidatesResults.empty();
@@ -54,7 +56,7 @@ App = {
             candidatesSelect.empty();
 
             for (var i = 1; i <= candidatesCount; i++) {
-                electionInstance.candidate(i).then(function(candidate) {
+                electionInstance.candidates(i).then(function(candidate) {
                     var id = candidate[0];
                     var name = candidate[1];
                     var voteCount = candidate[2];
@@ -69,8 +71,9 @@ App = {
             }
             return electionInstance.voters(App.account);
         }).then(function(hasVoted) {
+
             if (hasVoted) {
-                $('form').hide();
+                $("form").hide();
             }
             loader.hide();
             content.show();
@@ -81,6 +84,7 @@ App = {
 
     castVote: function() {
         var candidateId = $('#candidatesSelect').val();
+
         App.contracts.Election.deployed().then(function(instance) {
             return instance.vote(candidateId, { from: App.account });
         }).then(function(result) {
@@ -92,7 +96,7 @@ App = {
     },
 
     listenForEvents: function() {
-        App.contacts.Election.deployed().then(function(instance) {
+        App.contracts.Election.deployed().then(function(instance) {
             return instance.votedEvent({}, {
                 fromBlock: 0,
                 toBlock: 'latest'

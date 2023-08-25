@@ -29,8 +29,8 @@ contract Election {
         require(!voters[msg.sender]);
         require(_candidateId > 0 && _candidateId <= candidateCount);
         
-        voters[msg.sender] = true;
         candidates[_candidateId].voteCount++;
+        voters[msg.sender] = true;
         emit votedEvent(_candidateId);
     }
 }
